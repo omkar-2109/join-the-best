@@ -14,10 +14,10 @@ const Login = () => {
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <Link to="/" className="inline-flex items-center gap-2">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <span className="font-display text-lg font-bold text-primary-foreground">B</span>
-            </div>
+            <img src="/favicon.png" alt="BBS Logo" className="h-10 w-10 rounded-lg" />
             <span className="font-display text-xl font-bold text-foreground">BBS</span>
+          </Link>
+        </div>
           </Link>
         </div>
 
