@@ -11,9 +11,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent">
-                <span className="font-display text-sm font-bold text-accent-foreground">B</span>
-              </div>
+              <img src="/favicon.png" alt="BBS Logo" className="h-9 w-9 rounded-lg" />
               <div>
                 <div className="font-display text-lg font-bold">BBS</div>
                 <div className="text-xs text-primary-foreground/70">Benefit Business Solutions Pvt Ltd</div>
