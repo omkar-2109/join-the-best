@@ -19,9 +19,7 @@ const Navbar = () => {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <span className="font-display text-sm font-bold text-primary-foreground">B</span>
-          </div>
+          <img src="/favicon.png" alt="BBS Logo" className="h-9 w-9 rounded-lg" />
           <div className="hidden sm:block">
             <span className="font-display text-lg font-bold text-foreground">BBS</span>
             <span className="ml-1 hidden text-xs text-muted-foreground lg:inline">Benefit Business Solutions</span>
