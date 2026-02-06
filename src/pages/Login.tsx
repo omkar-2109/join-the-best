@@ -18,8 +18,6 @@ const Login = () => {
             <span className="font-display text-xl font-bold text-foreground">BBS</span>
           </Link>
         </div>
-          </Link>
-        </div>
 
         <Card className="shadow-premium">
           <CardHeader className="text-center">
