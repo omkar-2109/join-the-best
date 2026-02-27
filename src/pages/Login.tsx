@@ -36,11 +36,7 @@ const Login = () => {
               </div>
               <div className="relative">
                 <Input id="password" type={showPassword ? "text" : "password"} placeholder="Enter your password" />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                >
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
@@ -55,9 +51,13 @@ const Login = () => {
               <Button variant="outline" className="w-full">LinkedIn</Button>
             </div>
             <p className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/signup" className="font-medium text-primary hover:underline">Sign up</Link>
+              Don't have an account? <Link to="/signup" className="font-medium text-primary hover:underline">Register</Link>
             </p>
+            <div className="border-t border-border pt-3">
+              <Link to="/admin/dashboard" className="block text-center text-xs text-muted-foreground hover:text-primary">
+                Admin Login →
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
