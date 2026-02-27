@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { lovable } from "@/integrations/lovable/index";
 
 const Login = () => {
   const [email, setEmail] = useState("");
