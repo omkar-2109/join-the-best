@@ -4,9 +4,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
-  { label: "Find Jobs", href: "/jobs" },
-  { label: "Companies", href: "/companies" },
-  { label: "For Recruiters", href: "/recruiter-dashboard" },
+  { label: "Browse Roles", href: "/jobs" },
   { label: "About", href: "/about" },
 ];
 
@@ -17,7 +15,6 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <img src="/favicon.png" alt="BBS Logo" className="h-9 w-9 rounded-lg" />
           <div className="hidden sm:block">
@@ -26,16 +23,13 @@ const Navbar = () => {
           </div>
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               to={link.href}
               className={`rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary hover:text-foreground ${
-                location.pathname === link.href
-                  ? "bg-secondary text-foreground"
-                  : "text-muted-foreground"
+                location.pathname === link.href ? "bg-secondary text-foreground" : "text-muted-foreground"
               }`}
             >
               {link.label}
@@ -43,27 +37,20 @@ const Navbar = () => {
           ))}
         </nav>
 
-        {/* Auth Buttons */}
         <div className="hidden items-center gap-2 md:flex">
           <Button variant="ghost" size="sm" asChild>
-            <Link to="/login">Sign In</Link>
+            <Link to="/login">Login</Link>
           </Button>
           <Button size="sm" className="bg-accent text-accent-foreground hover:bg-gold-dark" asChild>
-            <Link to="/signup">Get Started</Link>
+            <Link to="/signup">Register</Link>
           </Button>
         </div>
 
-        {/* Mobile Toggle */}
-        <button
-          className="md:hidden"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
+        <button className="md:hidden" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Toggle menu">
           {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
       </div>
 
-      {/* Mobile Menu */}
       {mobileOpen && (
         <div className="border-t border-border bg-card md:hidden">
           <nav className="container mx-auto flex flex-col gap-1 px-4 py-3">
@@ -73,9 +60,7 @@ const Navbar = () => {
                 to={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={`rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-secondary ${
-                  location.pathname === link.href
-                    ? "bg-secondary text-foreground"
-                    : "text-muted-foreground"
+                  location.pathname === link.href ? "bg-secondary text-foreground" : "text-muted-foreground"
                 }`}
               >
                 {link.label}
@@ -83,10 +68,10 @@ const Navbar = () => {
             ))}
             <div className="mt-2 flex gap-2 border-t border-border pt-3">
               <Button variant="outline" size="sm" className="flex-1" asChild>
-                <Link to="/login" onClick={() => setMobileOpen(false)}>Sign In</Link>
+                <Link to="/login" onClick={() => setMobileOpen(false)}>Login</Link>
               </Button>
               <Button size="sm" className="flex-1 bg-accent text-accent-foreground hover:bg-gold-dark" asChild>
-                <Link to="/signup" onClick={() => setMobileOpen(false)}>Get Started</Link>
+                <Link to="/signup" onClick={() => setMobileOpen(false)}>Register</Link>
               </Button>
             </div>
           </nav>
