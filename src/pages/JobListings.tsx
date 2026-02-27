@@ -1,27 +1,34 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Search, MapPin, Filter, Bookmark, ArrowRight, Briefcase, Zap } from "lucide-react";
+import { Search, MapPin, Bookmark, ArrowRight, Briefcase, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Layout from "@/components/layout/Layout";
-import { getActiveJobs } from "@/data/store";
+import { supabase } from "@/integrations/supabase/client";
 
 const JobListings = () => {
   const [search, setSearch] = useState("");
   const [locationFilter, setLocationFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [savedJobs, setSavedJobs] = useState<Set<string>>(new Set());
+  const [allJobs, setAllJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allJobs = getActiveJobs();
+  useEffect(() => {
+    supabase.from("jobs").select("*").eq("active", true).then(({ data }) => {
+      setAllJobs(data || []);
+      setLoading(false);
+    });
+  }, []);
 
   const filteredJobs = useMemo(() => {
-    return allJobs.filter((job) => {
-      const matchesSearch = !search || job.title.toLowerCase().includes(search.toLowerCase()) || job.skills.some((s) => s.toLowerCase().includes(search.toLowerCase()));
-      const matchesLocation = !locationFilter || job.locations.some((l) => l.toLowerCase().includes(locationFilter.toLowerCase()));
-      const matchesType = !typeFilter || job.type === typeFilter;
+    return allJobs.filter((job: any) => {
+      const matchesSearch = !search || job.title.toLowerCase().includes(search.toLowerCase()) || job.skills?.some((s: string) => s.toLowerCase().includes(search.toLowerCase()));
+      const matchesLocation = !locationFilter || job.locations?.some((l: string) => l.toLowerCase().includes(locationFilter.toLowerCase()));
+      const matchesType = !typeFilter || typeFilter === "all" || job.type === typeFilter;
       return matchesSearch && matchesLocation && matchesType;
     });
   }, [allJobs, search, locationFilter, typeFilter]);
@@ -44,7 +51,6 @@ const JobListings = () => {
       </section>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Filters */}
         <div className="mb-6 rounded-xl border border-border bg-card p-4 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row">
             <div className="relative flex-1">
@@ -56,9 +62,7 @@ const JobListings = () => {
               <Input placeholder="Location" className="pl-10" value={locationFilter} onChange={(e) => setLocationFilter(e.target.value)} />
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-full md:w-40">
-                <SelectValue placeholder="Job Type" />
-              </SelectTrigger>
+              <SelectTrigger className="w-full md:w-40"><SelectValue placeholder="Job Type" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Types</SelectItem>
                 <SelectItem value="Full-time">Full-time</SelectItem>
@@ -67,9 +71,7 @@ const JobListings = () => {
                 <SelectItem value="Remote">Remote</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" onClick={() => { setSearch(""); setLocationFilter(""); setTypeFilter(""); }}>
-              Clear
-            </Button>
+            <Button variant="outline" onClick={() => { setSearch(""); setLocationFilter(""); setTypeFilter(""); }}>Clear</Button>
           </div>
         </div>
 
@@ -77,7 +79,9 @@ const JobListings = () => {
           Showing <span className="font-semibold text-foreground">{filteredJobs.length}</span> roles
         </p>
 
-        {filteredJobs.length === 0 ? (
+        {loading ? (
+          <div className="py-20 text-center text-muted-foreground">Loading roles...</div>
+        ) : filteredJobs.length === 0 ? (
           <div className="py-20 text-center">
             <Briefcase className="mx-auto mb-4 h-12 w-12 text-muted-foreground/40" />
             <h3 className="font-display text-lg font-semibold text-foreground">No roles found</h3>
@@ -85,7 +89,7 @@ const JobListings = () => {
           </div>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredJobs.map((job) => (
+            {filteredJobs.map((job: any) => (
               <Card key={job.id} className="group transition-all hover:shadow-premium">
                 <CardContent className="p-5">
                   <div className="mb-3 flex items-start justify-between">
@@ -105,9 +109,9 @@ const JobListings = () => {
                     {job.title}
                   </Link>
                   <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {job.locations.join(", ")}</span>
-                    <span>{job.salaryRange}</span>
-                    <span>{job.experienceRange}</span>
+                    <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {job.locations?.join(", ")}</span>
+                    <span>{job.salary_range}</span>
+                    <span>{job.experience_range}</span>
                   </div>
                   <div className="mt-4">
                     <Button variant="ghost" size="sm" className="h-7 text-xs text-primary" asChild>
