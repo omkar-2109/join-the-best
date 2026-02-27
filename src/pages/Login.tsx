@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { lovable } from "@/integrations/lovable/index";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -15,7 +16,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, candidateProfileId, user } = useAuth();
   const navigate = useNavigate();
 
   const handleGoogleSignIn = async () => {
@@ -38,7 +39,18 @@ const Login = () => {
       toast.error(error.message);
     } else {
       toast.success("Signed in successfully!");
-      navigate("/seeker-dashboard");
+      // Check if candidate profile exists
+      const { data: { user: loggedUser } } = await supabase.auth.getUser();
+      if (loggedUser) {
+        const { data: profile } = await supabase
+          .from("candidate_profiles")
+          .select("id")
+          .eq("user_id", loggedUser.id)
+          .maybeSingle();
+        navigate(profile ? "/seeker-dashboard" : "/complete-profile");
+      } else {
+        navigate("/complete-profile");
+      }
     }
   };
 

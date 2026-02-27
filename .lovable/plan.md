@@ -1,100 +1,99 @@
 
 
-# Candidate Signup: Two-Phase Flow with Email Verification
+# Benefit Business Solutions Pvt Ltd — Global Recruitment Platform
 
-## Overview
+A premium, corporate-styled recruitment platform by **Benefit Business Solutions Pvt Ltd**, connecting recruiters and job seekers worldwide. Built as a polished frontend showcase with sample data, ready for backend integration later.
 
-Restructure the signup process into two distinct phases:
-1. **Phase 1 (SignUp page)**: Register with email + password only, then verify email
-2. **Phase 2 (Profile completion page)**: After email verification and login, fill in detailed candidate profile
-
-This ensures verified users before collecting detailed personal information.
-
----
-
-## Changes
-
-### 1. Database Migration -- Add new columns to `candidate_profiles`
-
-Add columns to support the new fields requested:
-- `alt_phone` (text) -- alternate contact number
-- `dob` (text) -- date of birth
-- `pincode` (text) -- location pincode
-- `additional_courses` (text) -- additional certifications/courses
-- `field_of_work` (text) -- which field they work in
-- `hr_name` (text) -- company HR name (for experienced)
-
-The existing columns cover: name, email, phone, location (preferred_locations), qualification, work_history (JSONB for multiple experiences with HR details), resume_file_name, preferred_roles, skills.
-
-### 2. Disable Auto-Confirm Emails
-
-Use the configure-auth tool to ensure email confirmation is required (users must verify their email before signing in).
-
-### 3. Rewrite `SignUp.tsx` -- Simplified Registration
-
-Strip the current 3-step form down to just:
-- Full Name
-- Email
-- Password
-- Confirm Password
-
-On submit:
-- Call `signUp(email, password)`
-- Show success message: "Check your email to verify your account"
-- Redirect to `/login`
-
-No profile data collection at this stage.
-
-### 4. New Page: `CompleteProfile.tsx`
-
-A new route `/complete-profile` shown to logged-in users who have no `candidate_profiles` record yet.
-
-**Form fields (single scrollable page):**
-- Full Name (pre-filled from signup if available)
-- Contact No (required)
-- Alternate No (optional)
-- Email (pre-filled, read-only)
-- Date of Birth (date picker)
-- Location (text)
-- Pincode (text)
-- Highest Qualification (dropdown: 10th, 12th, Diploma, Graduate, Post Graduate, PhD)
-- Additional Courses (text)
-- Professional Experience toggle (Fresher / Experienced)
-  - If Experienced:
-    - Which Field (text)
-    - Company Name, HR Name, HR No (per entry)
-    - "Add More Experience" button for multiple entries
-  - If Fresher: no extra fields
-- CV Upload (file input, .pdf/.doc/.docx)
-- Interested Job Roles: multi-select dropdown with predefined options + "Other" free-text input
-  - Options: Software Developer, Data Analyst, Marketing, Sales, HR, Operations, Finance, Customer Support, Design, Content Writing, etc.
-
-**On submit**: Insert into `candidate_profiles` table, upload resume to storage bucket, redirect to `/seeker-dashboard`.
-
-### 5. Update Routing in `App.tsx`
-
-Add route: `/complete-profile` mapped to `CompleteProfile.tsx`.
-
-### 6. Update `SeekerDashboard.tsx` -- Profile Gate
-
-If a logged-in user has no `candidateProfileId`, redirect them to `/complete-profile` instead of showing an incomplete dashboard.
-
-### 7. Update `Login.tsx` -- Post-Login Redirect
-
-After successful login, check if the user has a candidate profile:
-- If yes: navigate to `/seeker-dashboard`
-- If no: navigate to `/complete-profile`
-
-### 8. Update `useAuth.tsx`
-
-The existing `candidateProfileId` check already works. The dashboard and login pages will use this to decide where to redirect.
+**Company Branding:**
+- Company Name: **Benefit Business Solutions Pvt Ltd (BBS)**
+- LinkedIn: https://in.linkedin.com/company/benefit-business-solutions-pvt-ltd
+- Instagram: https://www.instagram.com/bbs_pvt.ltd/
 
 ---
 
-## Technical Notes
+## 🎨 Design Direction
+- **Corporate & Premium** design — deep navy/dark blue primary, white/light gray backgrounds, gold/amber accent highlights
+- BBS branding throughout — logo text, company name in footer, and social links
+- Professional typography, polished cards, subtle shadows, and smooth transitions
+- Fully responsive — desktop, tablet, and mobile
 
-- The "Interested Job Roles" multi-select will use a custom component with checkboxes inside a Popover, plus an "Other" text input that appends to the selection
-- Work history entries stored as JSONB array in the existing `work_history` column, now including `hr_name` and `field_of_work`
-- The `candidate_profiles` table gets 4 new nullable text columns via migration
-- Email verification is enforced by disabling auto-confirm in auth settings
+---
+
+## 📄 Pages & Features
+
+### 1. Landing Page
+- Hero section with BBS branding, a compelling headline like "Connecting Global Talent with Opportunity", job search bar (title + location), and CTAs ("Find Jobs" / "Post a Job")
+- Trusted-by partner logos section (placeholders)
+- Key stats bar (e.g., "50K+ Jobs", "10K+ Companies", "1M+ Candidates")
+- How it works — 3-step process for both job seekers and recruiters
+- Featured job listings carousel
+- Testimonials section
+- Footer with BBS company info, navigation links, LinkedIn & Instagram social icons linking to actual BBS pages, and newsletter signup
+
+### 2. Job Listings Page
+- Advanced search with filters: keyword, location, job type (full-time, part-time, contract, remote), salary range, experience level, industry
+- Job cards with title, company, location, salary, job type badge, posted date
+- List/grid view toggle, pagination, and "Save Job" bookmark
+
+### 3. Job Detail Page
+- Full job description with company info sidebar
+- Key details: salary, location, type, experience required
+- "Apply Now" and "Save Job" buttons
+- Related jobs section and company overview card
+
+### 4. Candidate Profile Page
+- Profile header with avatar, name, title, location, availability status
+- Skills tags, work experience timeline, education section
+- Resume download button (placeholder) and portfolio links
+
+### 5. Company Profile Page
+- Company banner, logo, name, industry, size, location
+- About section, open positions list, culture highlights, benefits & perks
+
+### 6. Recruiter Dashboard
+- Overview cards: total jobs posted, applications, interviews scheduled, hires
+- Recent applications table with candidate details and status
+- Hiring pipeline visualization (Applied → Screening → Interview → Offer → Hired)
+- Analytics charts: applications over time, source breakdown
+- Quick actions: post new job, review candidates
+
+### 7. Applicant Tracking (ATS) Page
+- Kanban board view of candidates through hiring stages
+- Candidate cards with photo, name, position, and rating
+- Filter by job position and status
+- Candidate detail slide-out panel with notes and history
+
+### 8. Job Seeker Dashboard
+- Application status tracker (Applied, In Review, Interview, Offer)
+- Recommended jobs, saved jobs list, recent activity feed
+- Profile completion progress bar
+
+### 9. Login / Sign Up Pages
+- Clean auth forms with BBS branding
+- Role selection (Job Seeker vs Recruiter) on signup
+- Social login buttons (placeholder) and password recovery UI
+
+### 10. About Page
+- BBS company mission, story, and values
+- Team section with placeholder bios
+- Contact form with name, email, subject, message fields
+- Direct links to BBS LinkedIn and Instagram profiles
+
+---
+
+## 🧭 Navigation
+- **Top navbar** with BBS logo/name, main links (Find Jobs, Companies, For Recruiters, About), and auth buttons
+- **Dashboard sidebar** for recruiter/job seeker dashboard pages
+- **Footer** on all public pages with BBS branding, social links (LinkedIn & Instagram), and navigation
+- Mobile-responsive hamburger menu
+
+---
+
+## 📊 Sample Data
+All pages populated with realistic sample data — job listings across global locations, candidate profiles, company profiles, and dashboard metrics — so the platform looks fully operational as a showcase.
+
+---
+
+## Summary
+This delivers **10 professionally designed pages** branded as **Benefit Business Solutions Pvt Ltd**, with real social media links integrated, a premium corporate design, and comprehensive recruitment features for both recruiters and job seekers — ready to showcase and extend with a backend later.
 
