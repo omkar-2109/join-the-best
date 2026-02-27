@@ -1,13 +1,17 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Briefcase, Bookmark, Clock, TrendingUp, ArrowRight, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import Layout from "@/components/layout/Layout";
-import { getApplications, getJobById, getActiveJobs, type ApplicationStatus } from "@/data/store";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { useState, useEffect } from "react";
 
-const statusColors: Record<ApplicationStatus, string> = {
+type ApplicationStatus = "Applied" | "Profile Shortlisted" | "Submitted to Partner" | "Interview Scheduled" | "Offer" | "Rejected" | "On Hold";
+
+const statusColors: Record<string, string> = {
   "Applied": "bg-blue-100 text-blue-700",
   "Profile Shortlisted": "bg-amber-100 text-amber-700",
   "Submitted to Partner": "bg-purple-100 text-purple-700",
@@ -18,13 +22,43 @@ const statusColors: Record<ApplicationStatus, string> = {
 };
 
 const SeekerDashboard = () => {
-  const applications = getApplications(); // In real app, filter by logged-in user
-  const jobs = getActiveJobs().slice(0, 3);
+  const { user, loading: authLoading, candidateProfileId } = useAuth();
+  const [applications, setApplications] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
+  const [recommendedJobs, setRecommendedJobs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!candidateProfileId) { setLoading(false); return; }
+
+    const fetchData = async () => {
+      const [appsRes, jobsRes] = await Promise.all([
+        supabase.from("applications").select("*").eq("candidate_id", candidateProfileId),
+        supabase.from("jobs").select("*").eq("active", true).limit(3),
+      ]);
+      setApplications(appsRes.data || []);
+      setRecommendedJobs(jobsRes.data || []);
+
+      // Fetch job details for applications
+      if (appsRes.data?.length) {
+        const jobIds = [...new Set(appsRes.data.map((a: any) => a.job_id))];
+        const { data: jobData } = await supabase.from("jobs").select("*").in("id", jobIds);
+        setJobs(jobData || []);
+      }
+      setLoading(false);
+    };
+    fetchData();
+  }, [candidateProfileId]);
+
+  if (authLoading) return <Layout><div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading...</div></Layout>;
+  if (!user) return <Navigate to="/login" />;
+
+  const getJob = (jobId: string) => jobs.find((j: any) => j.id === jobId);
 
   const statusCounts = {
     total: applications.length,
-    interviews: applications.filter((a) => a.status === "Interview Scheduled").length,
-    offers: applications.filter((a) => a.status === "Offer").length,
+    interviews: applications.filter((a: any) => a.status === "Interview Scheduled").length,
+    offers: applications.filter((a: any) => a.status === "Offer").length,
   };
 
   return (
@@ -37,22 +71,19 @@ const SeekerDashboard = () => {
       </section>
 
       <div className="container mx-auto px-4 py-8 space-y-6">
-        {/* Profile Completion */}
         <Card>
           <CardContent className="flex items-center gap-4 p-5">
             <div className="flex-1">
               <div className="mb-1 flex items-center justify-between">
                 <span className="text-sm font-medium text-foreground">Profile Completion</span>
-                <span className="text-sm font-semibold text-accent">75%</span>
+                <span className="text-sm font-semibold text-accent">{candidateProfileId ? "100%" : "50%"}</span>
               </div>
-              <Progress value={75} className="h-2" />
-              <p className="mt-1 text-xs text-muted-foreground">Complete your profile for better matching</p>
+              <Progress value={candidateProfileId ? 100 : 50} className="h-2" />
+              <p className="mt-1 text-xs text-muted-foreground">{candidateProfileId ? "Your profile is complete" : "Complete your profile for better matching"}</p>
             </div>
-            <Button variant="outline" size="sm">Edit Profile</Button>
           </CardContent>
         </Card>
 
-        {/* Stats */}
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           {[
             { label: "Applications", value: String(statusCounts.total), icon: Briefcase, color: "bg-primary/10 text-primary" },
@@ -62,9 +93,7 @@ const SeekerDashboard = () => {
           ].map((s) => (
             <Card key={s.label}>
               <CardContent className="flex items-center gap-3 p-4">
-                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.color}`}>
-                  <s.icon className="h-5 w-5" />
-                </div>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${s.color}`}><s.icon className="h-5 w-5" /></div>
                 <div>
                   <div className="font-display text-xl font-bold text-foreground">{s.value}</div>
                   <div className="text-xs text-muted-foreground">{s.label}</div>
@@ -74,29 +103,26 @@ const SeekerDashboard = () => {
           ))}
         </div>
 
-        {/* Applications */}
         <Card>
-          <CardHeader>
-            <CardTitle className="font-display text-lg">My Applications</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle className="font-display text-lg">My Applications</CardTitle></CardHeader>
           <CardContent>
-            {applications.length === 0 ? (
+            {loading ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">Loading...</p>
+            ) : applications.length === 0 ? (
               <div className="py-8 text-center">
                 <Briefcase className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">No applications yet.</p>
-                <Button size="sm" className="mt-3" asChild>
-                  <Link to="/jobs">Browse Roles</Link>
-                </Button>
+                <Button size="sm" className="mt-3" asChild><Link to="/jobs">Browse Roles</Link></Button>
               </div>
             ) : (
               <div className="space-y-3">
-                {applications.map((app) => {
-                  const job = getJobById(app.jobId);
+                {applications.map((app: any) => {
+                  const job = getJob(app.job_id);
                   return (
                     <div key={app.id} className="flex items-center justify-between rounded-lg border border-border p-3 transition-colors hover:bg-secondary">
                       <div>
                         <div className="text-sm font-semibold text-foreground">{job?.title || "Unknown Role"}</div>
-                        <div className="text-xs text-muted-foreground">{app.locationPreference} · Applied {app.appliedAt}</div>
+                        <div className="text-xs text-muted-foreground">{app.location_preference} · Applied {new Date(app.applied_at).toLocaleDateString()}</div>
                       </div>
                       <Badge className={statusColors[app.status] || ""}>{app.status}</Badge>
                     </div>
@@ -107,7 +133,6 @@ const SeekerDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Recommended */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -118,17 +143,17 @@ const SeekerDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {jobs.length === 0 ? (
+            {recommendedJobs.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">No roles available yet.</p>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {jobs.map((job) => (
+                {recommendedJobs.map((job: any) => (
                   <Link key={job.id} to={`/jobs/${job.id}`} className="rounded-lg border border-border p-3 transition-colors hover:bg-secondary">
                     <div className="text-sm font-semibold text-foreground">{job.title}</div>
                     <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                      <MapPin className="h-3 w-3" /> {job.locations.join(", ")}
+                      <MapPin className="h-3 w-3" /> {job.locations?.join(", ")}
                     </div>
-                    <div className="mt-1 text-xs font-medium text-accent">{job.salaryRange}</div>
+                    <div className="mt-1 text-xs font-medium text-accent">{job.salary_range}</div>
                   </Link>
                 ))}
               </div>

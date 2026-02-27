@@ -14,16 +14,219 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      applications: {
+        Row: {
+          applied_at: string
+          candidate_id: string
+          id: string
+          internal_notes: string
+          job_id: string
+          location_preference: string
+          notes: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          applied_at?: string
+          candidate_id: string
+          id?: string
+          internal_notes?: string
+          job_id: string
+          location_preference?: string
+          notes?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          applied_at?: string
+          candidate_id?: string
+          id?: string
+          internal_notes?: string
+          job_id?: string
+          location_preference?: string
+          notes?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_profiles: {
+        Row: {
+          created_at: string
+          email: string
+          experience_type: string
+          experience_years: number
+          gap_reason: string | null
+          id: string
+          internship_experience: string | null
+          last_company: string | null
+          last_working_date: string | null
+          name: string
+          passing_year: string | null
+          phone: string
+          preferred_locations: string[]
+          preferred_roles: string[]
+          qualification: string | null
+          resume_file_name: string
+          salary_expectation: string
+          skills: string[]
+          updated_at: string
+          user_id: string
+          verification_status: string
+          work_history: Json | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          experience_type?: string
+          experience_years?: number
+          gap_reason?: string | null
+          id?: string
+          internship_experience?: string | null
+          last_company?: string | null
+          last_working_date?: string | null
+          name: string
+          passing_year?: string | null
+          phone?: string
+          preferred_locations?: string[]
+          preferred_roles?: string[]
+          qualification?: string | null
+          resume_file_name?: string
+          salary_expectation?: string
+          skills?: string[]
+          updated_at?: string
+          user_id: string
+          verification_status?: string
+          work_history?: Json | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          experience_type?: string
+          experience_years?: number
+          gap_reason?: string | null
+          id?: string
+          internship_experience?: string | null
+          last_company?: string | null
+          last_working_date?: string | null
+          name?: string
+          passing_year?: string | null
+          phone?: string
+          preferred_locations?: string[]
+          preferred_roles?: string[]
+          qualification?: string | null
+          resume_file_name?: string
+          salary_expectation?: string
+          skills?: string[]
+          updated_at?: string
+          user_id?: string
+          verification_status?: string
+          work_history?: Json | null
+        }
+        Relationships: []
+      }
+      jobs: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string
+          experience_range: string
+          id: string
+          internal_company_ids: string[]
+          locations: string[]
+          requirements: string[]
+          responsibilities: string[]
+          salary_range: string
+          skills: string[]
+          title: string
+          type: string
+          updated_at: string
+          urgency: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          experience_range?: string
+          id?: string
+          internal_company_ids?: string[]
+          locations?: string[]
+          requirements?: string[]
+          responsibilities?: string[]
+          salary_range?: string
+          skills?: string[]
+          title: string
+          type?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string
+          experience_range?: string
+          id?: string
+          internal_company_ids?: string[]
+          locations?: string[]
+          requirements?: string[]
+          responsibilities?: string[]
+          salary_range?: string
+          skills?: string[]
+          title?: string
+          type?: string
+          updated_at?: string
+          urgency?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +353,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

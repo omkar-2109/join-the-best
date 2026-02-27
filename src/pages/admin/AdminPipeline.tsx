@@ -1,56 +1,72 @@
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import AdminLayout from "@/components/layout/AdminLayout";
-import {
-  getApplications, getCandidates, getJobs, saveApplication,
-  type ApplicationStatus, type CandidateApplication,
-} from "@/data/store";
+import { useAuth } from "@/hooks/useAuth";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-const ALL_STATUSES: ApplicationStatus[] = [
+const ALL_STATUSES = [
   "Applied", "Profile Shortlisted", "Submitted to Partner",
   "Interview Scheduled", "Offer", "Rejected", "On Hold",
 ];
 
 const AdminPipeline = () => {
-  const [refreshKey, setRefreshKey] = useState(0);
-  const applications = getApplications();
-  const candidates = getCandidates();
-  const jobs = getJobs();
+  const { user, isAdmin, loading: authLoading } = useAuth();
+  const [applications, setApplications] = useState<any[]>([]);
+  const [candidates, setCandidates] = useState<any[]>([]);
+  const [jobs, setJobs] = useState<any[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [noteText, setNoteText] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const refresh = () => setRefreshKey((k) => k + 1);
-
-  const updateStatus = (app: CandidateApplication, status: ApplicationStatus) => {
-    saveApplication({ ...app, status, updatedAt: new Date().toISOString().split("T")[0] });
-    refresh();
+  const fetchData = async () => {
+    const [appsRes, candsRes, jobsRes] = await Promise.all([
+      supabase.from("applications").select("*").order("applied_at", { ascending: false }),
+      supabase.from("candidate_profiles").select("*"),
+      supabase.from("jobs").select("id, title"),
+    ]);
+    setApplications(appsRes.data || []);
+    setCandidates(candsRes.data || []);
+    setJobs(jobsRes.data || []);
+    setLoading(false);
   };
 
-  const saveNote = (app: CandidateApplication) => {
-    saveApplication({ ...app, internalNotes: noteText, updatedAt: new Date().toISOString().split("T")[0] });
-    setEditingId(null);
-    setNoteText("");
-    refresh();
+  useEffect(() => {
+    if (isAdmin) fetchData();
+  }, [isAdmin]);
+
+  if (authLoading) return <div className="flex min-h-screen items-center justify-center text-muted-foreground">Loading...</div>;
+  if (!user || !isAdmin) return <Navigate to="/login" />;
+
+  const updateStatus = async (appId: string, status: string) => {
+    const { error } = await supabase.from("applications").update({ status } as any).eq("id", appId);
+    if (error) toast.error(error.message);
+    else { toast.success("Status updated"); fetchData(); }
+  };
+
+  const saveNote = async (appId: string) => {
+    const { error } = await supabase.from("applications").update({ internal_notes: noteText } as any).eq("id", appId);
+    if (error) toast.error(error.message);
+    else { toast.success("Note saved"); setEditingId(null); setNoteText(""); fetchData(); }
   };
 
   return (
     <AdminLayout>
-      <div className="p-6 space-y-6" key={refreshKey}>
+      <div className="p-6 space-y-6">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">Candidate Pipeline</h1>
           <p className="text-sm text-muted-foreground">Manage candidate applications and update statuses</p>
         </div>
 
-        {applications.length === 0 ? (
-          <Card>
-            <CardContent className="py-16 text-center">
-              <p className="text-muted-foreground">No applications in the pipeline yet.</p>
-            </CardContent>
-          </Card>
+        {loading ? (
+          <div className="py-16 text-center text-muted-foreground">Loading pipeline...</div>
+        ) : applications.length === 0 ? (
+          <Card><CardContent className="py-16 text-center"><p className="text-muted-foreground">No applications in the pipeline yet.</p></CardContent></Card>
         ) : (
           <Card>
             <CardContent className="p-0">
@@ -64,13 +80,12 @@ const AdminPipeline = () => {
                       <th className="px-4 py-3 font-medium text-muted-foreground">Verification</th>
                       <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
                       <th className="px-4 py-3 font-medium text-muted-foreground">Notes</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {applications.map((app, i) => {
-                      const candidate = candidates.find((c) => c.id === app.candidateId);
-                      const job = jobs.find((j) => j.id === app.jobId);
+                    {applications.map((app: any, i: number) => {
+                      const candidate = candidates.find((c: any) => c.id === app.candidate_id);
+                      const job = jobs.find((j: any) => j.id === app.job_id);
                       return (
                         <tr key={app.id} className={`border-b border-border ${i % 2 === 0 ? "bg-secondary/30" : ""}`}>
                           <td className="px-4 py-3">
@@ -78,25 +93,17 @@ const AdminPipeline = () => {
                             <div className="text-xs text-muted-foreground">{candidate?.email}</div>
                           </td>
                           <td className="px-4 py-3 text-muted-foreground">{job?.title || "Unknown"}</td>
-                          <td className="px-4 py-3 text-muted-foreground capitalize">{candidate?.experienceType} · {candidate?.experienceYears}y</td>
+                          <td className="px-4 py-3 text-muted-foreground capitalize">{candidate?.experience_type} · {candidate?.experience_years}y</td>
                           <td className="px-4 py-3">
-                            <Badge className={
-                              candidate?.verificationStatus === "verified"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-amber-100 text-amber-700"
-                            }>
-                              {candidate?.verificationStatus || "pending"}
+                            <Badge className={candidate?.verification_status === "verified" ? "bg-green-100 text-green-700" : "bg-amber-100 text-amber-700"}>
+                              {candidate?.verification_status || "pending"}
                             </Badge>
                           </td>
                           <td className="px-4 py-3">
-                            <Select value={app.status} onValueChange={(v) => updateStatus(app, v as ApplicationStatus)}>
-                              <SelectTrigger className="h-8 w-44 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
+                            <Select value={app.status} onValueChange={(v) => updateStatus(app.id, v)}>
+                              <SelectTrigger className="h-8 w-44 text-xs"><SelectValue /></SelectTrigger>
                               <SelectContent>
-                                {ALL_STATUSES.map((s) => (
-                                  <SelectItem key={s} value={s}>{s}</SelectItem>
-                                ))}
+                                {ALL_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                               </SelectContent>
                             </Select>
                           </td>
@@ -104,21 +111,14 @@ const AdminPipeline = () => {
                             {editingId === app.id ? (
                               <div className="flex gap-1">
                                 <Textarea className="h-16 w-40 text-xs" value={noteText} onChange={(e) => setNoteText(e.target.value)} />
-                                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => saveNote(app)}>Save</Button>
+                                <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => saveNote(app.id)}>Save</Button>
                               </div>
                             ) : (
-                              <button
-                                className="max-w-[160px] truncate text-xs text-muted-foreground hover:text-foreground"
-                                onClick={() => { setEditingId(app.id); setNoteText(app.internalNotes); }}
-                              >
-                                {app.internalNotes || "Add note..."}
+                              <button className="max-w-[160px] truncate text-xs text-muted-foreground hover:text-foreground"
+                                onClick={() => { setEditingId(app.id); setNoteText(app.internal_notes || ""); }}>
+                                {app.internal_notes || "Add note..."}
                               </button>
                             )}
-                          </td>
-                          <td className="px-4 py-3">
-                            <Button size="sm" variant="ghost" className="h-7 text-xs text-primary">
-                              View
-                            </Button>
                           </td>
                         </tr>
                       );
