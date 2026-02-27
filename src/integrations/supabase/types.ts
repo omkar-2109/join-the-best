@@ -67,11 +67,16 @@ export type Database = {
       }
       candidate_profiles: {
         Row: {
+          additional_courses: string | null
+          alt_phone: string | null
           created_at: string
+          dob: string | null
           email: string
           experience_type: string
           experience_years: number
+          field_of_work: string | null
           gap_reason: string | null
+          hr_name: string | null
           id: string
           internship_experience: string | null
           last_company: string | null
@@ -79,6 +84,7 @@ export type Database = {
           name: string
           passing_year: string | null
           phone: string
+          pincode: string | null
           preferred_locations: string[]
           preferred_roles: string[]
           qualification: string | null
@@ -91,11 +97,16 @@ export type Database = {
           work_history: Json | null
         }
         Insert: {
+          additional_courses?: string | null
+          alt_phone?: string | null
           created_at?: string
+          dob?: string | null
           email: string
           experience_type?: string
           experience_years?: number
+          field_of_work?: string | null
           gap_reason?: string | null
+          hr_name?: string | null
           id?: string
           internship_experience?: string | null
           last_company?: string | null
@@ -103,6 +114,7 @@ export type Database = {
           name: string
           passing_year?: string | null
           phone?: string
+          pincode?: string | null
           preferred_locations?: string[]
           preferred_roles?: string[]
           qualification?: string | null
@@ -115,11 +127,16 @@ export type Database = {
           work_history?: Json | null
         }
         Update: {
+          additional_courses?: string | null
+          alt_phone?: string | null
           created_at?: string
+          dob?: string | null
           email?: string
           experience_type?: string
           experience_years?: number
+          field_of_work?: string | null
           gap_reason?: string | null
+          hr_name?: string | null
           id?: string
           internship_experience?: string | null
           last_company?: string | null
@@ -127,6 +144,7 @@ export type Database = {
           name?: string
           passing_year?: string | null
           phone?: string
+          pincode?: string | null
           preferred_locations?: string[]
           preferred_roles?: string[]
           qualification?: string | null
