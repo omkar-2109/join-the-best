@@ -14,6 +14,7 @@ import About from "./pages/About";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPipeline from "./pages/admin/AdminPipeline";
 import AdminRoles from "./pages/admin/AdminRoles";
+import CompleteProfile from "./pages/CompleteProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/about" element={<About />} />
+            <Route path="/complete-profile" element={<CompleteProfile />} />
             <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/admin/pipeline" element={<AdminPipeline />} />
             <Route path="/admin/roles" element={<AdminRoles />} />

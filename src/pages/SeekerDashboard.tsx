@@ -52,6 +52,7 @@ const SeekerDashboard = () => {
 
   if (authLoading) return <Layout><div className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading...</div></Layout>;
   if (!user) return <Navigate to="/login" />;
+  if (!candidateProfileId && !loading) return <Navigate to="/complete-profile" />;
 
   const getJob = (jobId: string) => jobs.find((j: any) => j.id === jobId);
 

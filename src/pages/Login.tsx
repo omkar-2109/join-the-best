@@ -15,7 +15,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, candidateProfileId, user } = useAuth();
   const navigate = useNavigate();
 
   const handleGoogleSignIn = async () => {
@@ -38,7 +38,11 @@ const Login = () => {
       toast.error(error.message);
     } else {
       toast.success("Signed in successfully!");
-      navigate("/seeker-dashboard");
+      // Redirect based on profile completion — use timeout to let auth context update
+      setTimeout(() => {
+        const profileId = (window as any).__bbsProfileCheck;
+        navigate(profileId ? "/seeker-dashboard" : "/complete-profile");
+      }, 500);
     }
   };
 
