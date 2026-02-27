@@ -38,11 +38,18 @@ const Login = () => {
       toast.error(error.message);
     } else {
       toast.success("Signed in successfully!");
-      // Redirect based on profile completion — use timeout to let auth context update
-      setTimeout(() => {
-        const profileId = (window as any).__bbsProfileCheck;
-        navigate(profileId ? "/seeker-dashboard" : "/complete-profile");
-      }, 500);
+      // Check if candidate profile exists
+      const { data: { user: loggedUser } } = await supabase.auth.getUser();
+      if (loggedUser) {
+        const { data: profile } = await supabase
+          .from("candidate_profiles")
+          .select("id")
+          .eq("user_id", loggedUser.id)
+          .maybeSingle();
+        navigate(profile ? "/seeker-dashboard" : "/complete-profile");
+      } else {
+        navigate("/complete-profile");
+      }
     }
   };
 
