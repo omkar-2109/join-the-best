@@ -186,27 +186,53 @@ const CompleteProfile = () => {
               </div>
               <div className="space-y-2">
                 <Label>Date of Birth</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !dob && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dob ? format(dob, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      captionLayout="dropdown-buttons"
-                      fromYear={1950}
-                      toYear={new Date().getFullYear()}
-                      selected={dob}
-                      onSelect={setDob}
-                      disabled={(date) => date > new Date() || date < new Date("1950-01-01")}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <div className="grid grid-cols-3 gap-2">
+                  <Select
+                    value={dob ? String(dob.getDate()) : ""}
+                    onValueChange={(val) => {
+                      const d = dob ? new Date(dob) : new Date(2000, 0, 1);
+                      d.setDate(parseInt(val));
+                      setDob(new Date(d));
+                    }}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Day" /></SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                        <SelectItem key={d} value={String(d)}>{d}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={dob ? String(dob.getMonth()) : ""}
+                    onValueChange={(val) => {
+                      const d = dob ? new Date(dob) : new Date(2000, 0, 1);
+                      d.setMonth(parseInt(val));
+                      setDob(new Date(d));
+                    }}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Month" /></SelectTrigger>
+                    <SelectContent>
+                      {["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"].map((m, i) => (
+                        <SelectItem key={i} value={String(i)}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={dob ? String(dob.getFullYear()) : ""}
+                    onValueChange={(val) => {
+                      const d = dob ? new Date(dob) : new Date(2000, 0, 1);
+                      d.setFullYear(parseInt(val));
+                      setDob(new Date(d));
+                    }}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: new Date().getFullYear() - 1950 + 1 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                        <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
