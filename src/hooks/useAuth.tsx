@@ -83,11 +83,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut({ scope: 'local' });
-    setUser(null);
-    setSession(null);
-    setIsAdmin(false);
-    setCandidateProfileId(null);
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch (error) {
+      const isLockAbortError =
+        error instanceof Error &&
+        error.name === "AbortError" &&
+        error.message.includes("Lock broken by another request with the 'steal' option.");
+
+      if (!isLockAbortError) {
+        throw error;
+      }
+    } finally {
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      setCandidateProfileId(null);
+    }
   };
 
   return (
