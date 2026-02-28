@@ -69,6 +69,7 @@ export type Database = {
         Row: {
           additional_courses: string | null
           alt_phone: string | null
+          college_name: string | null
           created_at: string
           dob: string | null
           email: string
@@ -99,6 +100,7 @@ export type Database = {
         Insert: {
           additional_courses?: string | null
           alt_phone?: string | null
+          college_name?: string | null
           created_at?: string
           dob?: string | null
           email: string
@@ -129,6 +131,7 @@ export type Database = {
         Update: {
           additional_courses?: string | null
           alt_phone?: string | null
+          college_name?: string | null
           created_at?: string
           dob?: string | null
           email?: string

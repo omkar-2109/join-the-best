@@ -51,6 +51,9 @@ const CompleteProfile = () => {
 
   // Education
   const [qualification, setQualification] = useState("");
+  const [courseName, setCourseName] = useState("");
+  const [passingYear, setPassingYear] = useState("");
+  const [collegeName, setCollegeName] = useState("");
   const [additionalCourses, setAdditionalCourses] = useState("");
 
   // Experience
@@ -122,7 +125,9 @@ const CompleteProfile = () => {
         preferred_locations: location.trim() ? [location.trim()] : [],
         pincode: pincode.trim(),
         qualification,
-        additional_courses: additionalCourses.trim(),
+        additional_courses: courseName.trim(),
+        passing_year: passingYear || null,
+        college_name: collegeName.trim(),
         experience_type: experienceType,
         experience_years: experienceType === "fresher" ? 0 : 1,
         field_of_work: experienceType === "experienced" ? workHistory[0]?.field || "" : "",
@@ -263,6 +268,27 @@ const CompleteProfile = () => {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Course / Stream</Label>
+                  <Input placeholder="e.g., B.Tech CS, BCom, Diploma Mech" value={courseName} onChange={(e) => setCourseName(e.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Passout Year</Label>
+                  <Select value={passingYear} onValueChange={setPassingYear}>
+                    <SelectTrigger><SelectValue placeholder="Select year" /></SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: new Date().getFullYear() - 1980 + 1 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                        <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>College / Institute Name</Label>
+                <Input placeholder="e.g., IIT Delhi, Mumbai University" value={collegeName} onChange={(e) => setCollegeName(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label>Additional Courses / Certifications</Label>
