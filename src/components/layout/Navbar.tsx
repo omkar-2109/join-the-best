@@ -3,13 +3,14 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
-
+  const { toast } = useToast();
   const navLinks = [
     { label: "Browse Roles", href: "/jobs" },
     { label: "About", href: "/about" },
@@ -18,8 +19,12 @@ const Navbar = () => {
   ];
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
+    try {
+      await signOut();
+      navigate("/");
+    } catch {
+      toast({ title: "Sign out failed", description: "Please try again.", variant: "destructive" });
+    }
   };
 
   return (
