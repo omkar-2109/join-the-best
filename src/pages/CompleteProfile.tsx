@@ -204,13 +204,6 @@ const CompleteProfile = () => {
                       disabled={(date) => date > new Date() || date < new Date("1950-01-01")}
                       initialFocus
                       className={cn("p-3 pointer-events-auto")}
-                      classNames={{
-                        caption_dropdowns: "flex gap-2",
-                        vhidden: "hidden",
-                        dropdown_month: "flex items-center",
-                        dropdown_year: "flex items-center",
-                        dropdown: "rounded border border-input bg-background px-2 py-1 text-sm",
-                      }}
                     />
                   </PopoverContent>
                 </Popover>
